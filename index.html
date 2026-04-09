@@ -698,7 +698,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
   <div class="main">
     <div class="sidebar" id="sidebar">
       <!-- V11: Left detail overlay — slides in over sidebar content -->
-      <div class="sidebar-detail-view" id="sidebarDetailView"></div>
+      <div class="sidebar-detail-view" id="sidebarDetailView" onclick="event.stopPropagation()"></div>
       <div class="side-resize-handle" id="sideResizeHandle"></div>
       <div class="side-top" id="sideTop"></div>
       <div class="side-tabs" id="sideTabs">
@@ -2217,15 +2217,12 @@ function closeSidebarDetail() {
 }
 
 // Click-away: close sidebar detail when clicking outside it.
-// Uses composedPath() so the check survives innerHTML replacements that remove
-// the clicked element from the DOM before the event bubbles to document.
+// stopPropagation on #sidebarDetailView (set in HTML) means clicks inside
+// the panel never reach this listener — so anything that does reach it is outside.
 document.addEventListener('click', function(e) {
   const detail = document.getElementById('sidebarDetailView');
   if (!detail || !detail.classList.contains('open')) return;
-  const path = e.composedPath();
-  const insideDetail = path.includes(detail);
-  const onConvCard = path.some(el => el.classList && el.classList.contains('conv-card'));
-  if (insideDetail || onConvCard) return;
+  if (e.target.closest('.conv-card')) return; // clicking a card switches detail, not closes it
   closeSidebarDetail();
 });
 
