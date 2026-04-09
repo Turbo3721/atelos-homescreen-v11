@@ -2216,14 +2216,16 @@ function closeSidebarDetail() {
   document.querySelectorAll('.conv-card').forEach(el => el.classList.remove('active'));
 }
 
-// Click-away: close sidebar detail when clicking outside it
+// Click-away: close sidebar detail when clicking outside it.
+// Uses composedPath() so the check survives innerHTML replacements that remove
+// the clicked element from the DOM before the event bubbles to document.
 document.addEventListener('click', function(e) {
   const detail = document.getElementById('sidebarDetailView');
   if (!detail || !detail.classList.contains('open')) return;
-  // If click is inside the detail panel or on a conv card, keep it open
-  if (detail.contains(e.target) || e.target.closest('.conv-card')) return;
-  // If click is inside the sidebar (but not on a card or detail), keep it open
-  // so switching tabs or clicking tasks doesn't dismiss it
+  const path = e.composedPath();
+  const insideDetail = path.includes(detail);
+  const onConvCard = path.some(el => el.classList && el.classList.contains('conv-card'));
+  if (insideDetail || onConvCard) return;
   closeSidebarDetail();
 });
 
