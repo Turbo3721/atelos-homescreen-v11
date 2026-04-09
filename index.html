@@ -630,8 +630,13 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .sidebar-detail-view{position:absolute;top:0;left:0;right:0;bottom:0;background:var(--bg-side);z-index:10;display:flex;flex-direction:column;transform:translateX(-100%);transition:transform .25s ease;overflow:hidden}
 .sidebar-detail-view.open{transform:translateX(0)}
 .sidebar-detail-top{padding:16px 22px 14px;border-bottom:1px solid var(--border);flex-shrink:0}
-.sidebar-back-btn{display:inline-flex;align-items:center;gap:5px;background:transparent;border:none;color:var(--text4);cursor:pointer;font-size:12px;font-weight:500;padding:0;font-family:inherit;transition:color .15s;margin-bottom:12px}
+.sidebar-detail-top-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sidebar-back-btn{display:inline-flex;align-items:center;gap:5px;background:transparent;border:none;color:var(--text4);cursor:pointer;font-size:12px;font-weight:500;padding:0;font-family:inherit;transition:color .15s}
 .sidebar-back-btn:hover{color:var(--accent)}
+.sidebar-nav-arrows{display:flex;align-items:center;gap:2px}
+.sidebar-nav-btn{width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:7px;background:transparent;border:1px solid var(--border-lt);color:var(--text4);cursor:pointer;transition:all .15s;flex-shrink:0}
+.sidebar-nav-btn:hover:not(:disabled){background:var(--bg-hover);color:var(--text2);border-color:var(--border)}
+.sidebar-nav-btn:disabled{opacity:.25;cursor:default}
 .sidebar-detail-title{font-size:15px;font-weight:700;color:var(--text);line-height:1.35;letter-spacing:-.2px}
 .sidebar-detail-meta{font-size:11px;color:var(--text4);margin-top:5px;display:flex;align-items:center;gap:5px}
 .sidebar-detail-scroll{flex:1;overflow-y:auto;padding:18px 22px 24px}
@@ -2084,6 +2089,15 @@ function showConvDetailInSidebar(convId) {
   const ICON_FILE2 = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
   const ICON_MSG = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
   const ICON_BACK = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>';
+  const ICON_UP = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>';
+  const ICON_DN = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>';
+
+  // Determine prev/next in the currently visible conv list
+  const allCards = Array.from(document.querySelectorAll('.conv-card'));
+  const currentIdx = allCards.findIndex(el => el.dataset.convId === convId);
+  const prevId = currentIdx > 0 ? allCards[currentIdx - 1].dataset.convId : null;
+  const nextId = currentIdx < allCards.length - 1 ? allCards[currentIdx + 1].dataset.convId : null;
+  const pos = allCards.length > 0 ? `${currentIdx + 1} of ${allCards.length}` : '';
 
   // Meta line
   let metaItems = [c.date, `${c.messages} msgs`];
@@ -2142,10 +2156,17 @@ function showConvDetailInSidebar(convId) {
 
   const html = `
     <div class="sidebar-detail-top">
-      <button class="sidebar-back-btn" onclick="closeSidebarDetail()">${ICON_BACK} Back</button>
+      <div class="sidebar-detail-top-row">
+        <button class="sidebar-back-btn" onclick="closeSidebarDetail()">${ICON_BACK} Back</button>
+        <div class="sidebar-nav-arrows">
+          <button class="sidebar-nav-btn" onclick="showConvDetailInSidebar('${prevId}')" title="Previous conversation" ${!prevId ? 'disabled' : ''}>${ICON_UP}</button>
+          <button class="sidebar-nav-btn" onclick="showConvDetailInSidebar('${nextId}')" title="Next conversation" ${!nextId ? 'disabled' : ''}>${ICON_DN}</button>
+        </div>
+      </div>
       <div class="sidebar-detail-title">${c.title}</div>
       <div class="sidebar-detail-meta">
         ${metaItems.join('<span style="color:var(--border-lt);margin:0 2px">·</span>')}
+        ${pos ? `<span style="color:var(--border-lt);margin:0 2px">·</span><span style="color:var(--text4)">${pos}</span>` : ''}
       </div>
     </div>
     <div class="sidebar-detail-scroll">
@@ -2628,7 +2649,15 @@ function showImportTab(tab, el) {
 function openCapture(){document.getElementById('captureModal').classList.add('open');document.querySelector('.modal-input').focus();}
 function closeCapture(){document.getElementById('captureModal').classList.remove('open');document.querySelector('.modal-input').value='';}
 function doCapture(){const v=document.querySelector('.modal-input').value;if(v.trim()){alert('Captured:\n\n"'+v+'"\n\nSaved to triage. Sorted automatically or during next review.');closeCapture();}}
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeCapture();closeImport();closeFilePreview();closeFileView();closeSidebarDetail();hideConvMenu();hideTagDropdown();}});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeCapture(); closeImport(); closeFilePreview(); closeFileView(); closeSidebarDetail(); hideConvMenu(); hideTagDropdown(); return; }
+  // Arrow key navigation while detail is open (not when typing in an input)
+  const detail = document.getElementById('sidebarDetailView');
+  if (!detail || !detail.classList.contains('open')) return;
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === 'ArrowUp') { e.preventDefault(); detail.querySelector('.sidebar-nav-btn:first-child:not(:disabled)')?.click(); }
+  if (e.key === 'ArrowDown') { e.preventDefault(); detail.querySelector('.sidebar-nav-btn:last-child:not(:disabled)')?.click(); }
+});
 
 // ── Sidebar resize ──
 (function initSidebarResize() {
