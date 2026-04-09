@@ -651,17 +651,47 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .sidebar-open-conv-btn:hover{background:var(--accent-h)}
 
 /* ── Right file view panel (v11) ── */
-.file-view-panel{position:fixed;top:0;right:0;width:500px;height:100%;background:var(--bg-card2);border-left:1px solid var(--border-lt);z-index:40;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease;box-shadow:-8px 0 32px rgba(0,0,0,.3)}
+.file-view-panel{position:fixed;top:0;right:0;width:560px;height:100%;background:var(--bg-card2);border-left:1px solid var(--border-lt);z-index:40;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .25s ease;box-shadow:-12px 0 40px rgba(0,0,0,.35)}
 .file-view-panel.open{transform:translateX(0)}
-.file-view-header{display:flex;align-items:flex-start;justify-content:space-between;padding:18px 24px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
-.file-view-title{font-size:16px;font-weight:700;color:var(--text);letter-spacing:-.2px}
-.file-view-path{font-size:12px;color:var(--text3);margin-top:3px}
-.file-view-close{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:8px;color:var(--text4);cursor:pointer;border:none;background:transparent;font-size:18px;transition:all .15s;flex-shrink:0}
+.file-view-resize-handle{position:absolute;top:0;left:-4px;width:8px;height:100%;cursor:col-resize;z-index:5;background:transparent;transition:background .15s}
+.file-view-resize-handle:hover,.file-view-resize-handle.dragging{background:var(--accent-b)}
+.file-view-header{display:flex;align-items:flex-start;justify-content:space-between;padding:18px 24px 14px;border-bottom:1px solid var(--border);flex-shrink:0;gap:12px}
+.file-view-title{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.2px;font-family:'SF Mono',ui-monospace,monospace}
+.file-view-path{font-size:11px;color:var(--text4);margin-top:3px;font-family:'SF Mono',ui-monospace,monospace;opacity:.7}
+.file-view-close{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:8px;color:var(--text4);cursor:pointer;border:none;background:transparent;font-size:18px;transition:all .15s;flex-shrink:0;margin-top:-2px}
 .file-view-close:hover{background:var(--bg-hover);color:var(--text2)}
-.file-view-body{flex:1;overflow-y:auto;padding:24px 32px 32px}
+.file-view-body{flex:1;overflow-y:auto;padding:28px 40px 48px}
 .file-view-body::-webkit-scrollbar{width:4px}
 .file-view-body::-webkit-scrollbar-thumb{background:var(--border-lt);border-radius:2px}
 .file-view-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text4);font-size:13px;gap:10px}
+
+/* ── Markdown renderer ── */
+.md-h1{font-size:24px;font-weight:700;color:var(--text);letter-spacing:-.4px;margin:0 0 20px;line-height:1.3}
+.md-h2{font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;margin:32px 0 14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.md-h2:first-child{margin-top:0}
+.md-h3{font-size:15px;font-weight:600;color:var(--text);margin:22px 0 8px;letter-spacing:-.1px}
+.md-h4{font-size:11px;font-weight:700;color:var(--text3);margin:18px 0 6px;text-transform:uppercase;letter-spacing:.5px}
+.md-p{font-size:14px;color:var(--text2);line-height:1.8;margin:0 0 12px}
+.md-code{font-family:'SF Mono',ui-monospace,monospace;font-size:12px;background:rgba(155,138,251,.1);color:var(--accent);padding:2px 7px;border-radius:5px;letter-spacing:-.2px}
+.md-pre{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:18px 22px;margin:14px 0;overflow-x:auto}
+.md-codeblock{font-family:'SF Mono',ui-monospace,monospace;font-size:12.5px;color:var(--text2);white-space:pre;display:block;line-height:1.65}
+.md-blockquote{border-left:3px solid var(--accent-b);background:var(--accent-d);padding:12px 18px;border-radius:0 10px 10px 0;margin:14px 0;color:var(--text2);font-style:italic;line-height:1.7;font-size:13.5px}
+.md-ul{padding-left:0;margin:8px 0 14px;list-style:none}
+.md-ol{padding-left:22px;margin:8px 0 14px}
+.md-ul .md-li{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:6px;padding-left:0}
+.md-ul .md-li::before{content:'·';color:var(--text4);font-size:18px;line-height:1.3;flex-shrink:0}
+.md-ol .md-li{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:6px}
+.md-tasklist .md-li::before{display:none}
+.md-task{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;font-size:14px;color:var(--text2);line-height:1.6}
+.md-checkbox{width:16px;height:16px;border:1.5px solid var(--border-lt);border-radius:4px;flex-shrink:0;margin-top:3px;display:flex;align-items:center;justify-content:center;background:transparent}
+.md-checkbox-done{background:var(--green);border-color:var(--green)}
+.md-task-done .md-task-text{text-decoration:line-through;color:var(--text4)}
+.md-hr{border:none;border-top:1px solid var(--border);margin:24px 0}
+.md-link{color:var(--accent);font-weight:500;cursor:pointer;text-decoration:none}
+.md-link:hover{text-decoration:underline}
+.md-spacer{height:6px}
+.md-strong{color:var(--text);font-weight:600}
+.md-em{font-style:italic}
 </style>
 </head>
 <body>
@@ -737,6 +767,7 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 </div>
 <!-- V11: Right file view panel — slides in from right when an output is opened -->
 <div class="file-view-panel" id="fileViewPanel">
+  <div class="file-view-resize-handle" id="fileViewResizeHandle"></div>
   <div class="file-view-header">
     <div>
       <div class="file-view-title" id="fileViewTitle"></div>
@@ -1080,160 +1111,293 @@ const FILE_CONTENT = {
     `
   },
 
-  // ── Output files for conversation cards ──
-  'nomad-group-sow.md': {
-    render: () => `
-      <div class="fv-h1">Nomad Group — Statement of Work</div>
-      <div class="fv-h2">Engagement Overview</div>
-      <div class="fv-p">AI Readiness Assessment — 6-week engagement at <strong style="color:var(--text)">$12,500</strong>. Kick-off pending client confirmation of scope and timeline.</div>
-      <div class="fv-h2">Scope of Work</div>
-      <div class="fv-bullet">Weeks 1–2: Workflow audit across 2–4 internal teams</div>
-      <div class="fv-bullet">Weeks 3–4: AI tool evaluation and stakeholder interviews</div>
-      <div class="fv-bullet">Weeks 5–6: Written assessment + executive presentation</div>
-      <div class="fv-bullet">Deliverable: 90-day implementation roadmap</div>
-      <div class="fv-h2">Open Questions</div>
-      <div class="fv-task"><span class="fv-checkbox"></span><span class="fv-task-text">Confirm internal champion — Marcus or Priya?<span class="fv-tag due">Follow up</span></span></div>
-      <div class="fv-task"><span class="fv-checkbox"></span><span class="fv-task-text">Clarify whether legal needs to review before signing</span></div>
-      <div class="fv-h2">Notes</div>
-      <div class="fv-note">Drafted from Nomad Group discovery call (Apr 9). Price validated at $10–15K range per prior ICP signals. Two follow-up questions flagged before sending.</div>
-    `
-  },
-  'interview-guide.md': {
-    render: () => `
-      <div class="fv-h1">ICP Interview Guide</div>
-      <div class="fv-h2">Context</div>
-      <div class="fv-p">5 priority questions for first-wave ICP interviews. Focus: understanding current workflow pain before introducing the product.</div>
-      <div class="fv-h2">Opening</div>
-      <div class="fv-note">Start with context, not product. "Tell me about how your team currently manages [problem area]." Listen for: workarounds, emotional language, time lost.</div>
-      <div class="fv-h2">Priority Questions</div>
-      <div class="fv-bullet">Walk me through how you track and manage supplier certifications today.</div>
-      <div class="fv-bullet">What's the most frustrating part of your compliance reporting cycle?</div>
-      <div class="fv-bullet">How many tools does your team use to piece this together?</div>
-      <div class="fv-bullet">What would you need to see to trust a new tool with this workflow?</div>
-      <div class="fv-bullet">If you could fix one thing about your current process, what would it be?</div>
-      <div class="fv-h2">Signals to Watch For</div>
-      <div class="fv-bullet">Mentions of manual reconciliation or "copy-paste from email"</div>
-      <div class="fv-bullet">Multiple stakeholders involved in a single report</div>
-      <div class="fv-bullet">Compliance deadlines driving urgency</div>
-    `
-  },
-  'partner-call-apr3.md': {
-    render: () => `
-      <div class="fv-h1">Dev Partner Sync — Launchpad Studio</div>
-      <div class="fv-h2">Apr 3, 2026 · 45 min · Parsed by Meeting Parser</div>
-      <div class="fv-h2">Decisions</div>
-      <div class="fv-task done"><span class="fv-checkbox"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span class="fv-task-text">Locked onboarding wizard scope to 3-step flow</span></div>
-      <div class="fv-task done"><span class="fv-checkbox"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span class="fv-task-text">Confirmed REST API path for supplier data pull</span></div>
-      <div class="fv-task done"><span class="fv-checkbox"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span class="fv-task-text">Agreed: Bubble.io handles front-end, Greenline owns data model</span></div>
-      <div class="fv-h2">Action Items</div>
-      <div class="fv-task"><span class="fv-checkbox"></span><span class="fv-task-text">Share Meridian API docs with Launchpad by Apr 5<span class="fv-tag due">Apr 5</span></span></div>
-      <div class="fv-task"><span class="fv-checkbox"></span><span class="fv-task-text">Launchpad to send staging environment link by Apr 7<span class="fv-tag due">Apr 7</span></span></div>
-      <div class="fv-task"><span class="fv-checkbox"></span><span class="fv-task-text">Schedule next sync for week of Apr 14</span></div>
-      <div class="fv-h2">Notes</div>
-      <div class="fv-note">Launchpad flagged potential latency issue with large supplier lists. Will scope a pagination solution before next build sprint.</div>
-    `
-  },
-  'apr-4.md': {
-    render: () => `
-      <div class="fv-h1">Weekly Review — Apr 4, 2026</div>
-      <div class="fv-h2">Generated by Weekly Review Skill</div>
-      <div class="fv-h2">This Week's Wins</div>
-      <div class="fv-bullet">First dev partner sync completed — Launchpad scope locked</div>
-      <div class="fv-bullet">Nomad Group discovery call → SOW draft initiated</div>
-      <div class="fv-bullet">4 ICP interviews scheduled for April</div>
-      <div class="fv-h2">Open Items (Carried Forward)</div>
-      <div class="fv-task"><span class="fv-checkbox"></span><span class="fv-task-text">Volta: Pinecrest questionnaire still incomplete — 2 sections blank<span class="fv-tag blocked">Overdue</span></span></div>
-      <div class="fv-task"><span class="fv-checkbox"></span><span class="fv-task-text">Greenline: Landing page hero copy — A/B version not yet drafted</span></div>
-      <div class="fv-h2">Flags</div>
-      <div class="fv-note">Volta falling behind on Nomad Group SOW — transcript parsing blocked by missing audio file. Follow up with client for recording or manual notes.</div>
-      <div class="fv-h2">Focus for Next Week</div>
-      <div class="fv-bullet">Ship Nomad Group SOW for review by Apr 9</div>
-      <div class="fv-bullet">Complete first ICP interview</div>
-      <div class="fv-bullet">Unblock Pinecrest questionnaire</div>
-    `
-  },
-  'feedback-apr6.md': {
-    render: () => `
-      <div class="fv-h1">Homescreen Feedback — Ashley</div>
-      <div class="fv-h2">Apr 6, 2026 · Session review</div>
-      <div class="fv-h2">Act Now</div>
-      <div class="fv-task"><span class="fv-checkbox"></span><span class="fv-task-text">Rename "Unsorted" → "Triage" — label feels more intentional<span class="fv-tag progress">in progress</span></span></div>
-      <div class="fv-task"><span class="fv-checkbox"></span><span class="fv-task-text">Collapse file tree by default — feels cluttered at first open</span></div>
-      <div class="fv-h2">Positive Signals</div>
-      <div class="fv-bullet">Loved the skill bar — "finally a toolbar that makes sense"</div>
-      <div class="fv-bullet">Day-scoped threads felt natural after 2 minutes</div>
-      <div class="fv-bullet">Quick capture shortcut discovered without prompting</div>
-      <div class="fv-h2">Deferred</div>
-      <div class="fv-bullet">Search across threads — requested but deferred to V1.1</div>
-      <div class="fv-bullet">Export conversation to PDF — "nice to have, not blocking"</div>
-      <div class="fv-h2">Notes</div>
-      <div class="fv-note">Ashley tested on 13" MacBook — sidebar felt slightly narrow at default width. Consider 300px default on launch.</div>
-    `
-  },
-  'decisions-log.md': {
-    render: () => `
-      <div class="fv-h1">Decisions Log</div>
-      <div class="fv-h2">Apr 9, 2026</div>
-      <div class="fv-bullet">V1 skill list locked: Daily Briefing, Capture Idea, Meeting Parser, Weekly Review</div>
-      <div class="fv-bullet">Vault Health + Research Interview deferred to V1.1</div>
-      <div class="fv-bullet">Skill bar shows locked skills grayed — upgrade prompt on click</div>
-      <div class="fv-h2">Apr 3, 2026</div>
-      <div class="fv-bullet">Sidebar width default: 280px with resize handle</div>
-      <div class="fv-bullet">Thread model: day-scoped accordion, not channels</div>
-      <div class="fv-h2">Mar 22, 2026</div>
-      <div class="fv-bullet">Product name confirmed: Atelos</div>
-      <div class="fv-bullet">Pricing: Free / BYOK $19 / Managed $39</div>
-      <div class="fv-bullet">V1 Claude-exclusive. BYOM deferred to V2</div>
-    `
-  },
-  'tasks.md': {
-    render: () => `
-      <div class="fv-h1">Greenline — tasks.md</div>
-      <div class="fv-h2">Open</div>
-      <div class="fv-task"><span class="fv-checkbox"></span><span class="fv-task-text">Share Meridian API docs with build partner<span class="fv-tag due">Apr 5</span></span></div>
-      <div class="fv-task"><span class="fv-checkbox"></span><span class="fv-task-text">Write landing page hero copy — A/B version<span class="fv-tag due">Apr 9</span></span></div>
-      <div class="fv-task"><span class="fv-checkbox"></span><span class="fv-task-text">Schedule 3 ICP interviews with reentry counselors<span class="fv-tag due">Apr 11</span></span></div>
-      <div class="fv-h2">Added by Meeting Parser — Apr 3</div>
-      <div class="fv-task done"><span class="fv-checkbox"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span class="fv-task-text">First build partner call completed</span></div>
-      <div class="fv-task done"><span class="fv-checkbox"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span class="fv-task-text">Confirm Bubble.io dev environment setup</span></div>
-    `
-  },
-  'v1-features.md': {
-    render: () => `
-      <div class="fv-h1">V1 Feature Scope</div>
-      <div class="fv-h2">Shipping in V1</div>
-      <div class="fv-task done"><span class="fv-checkbox"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span class="fv-task-text">Daily Briefing skill</span></div>
-      <div class="fv-task done"><span class="fv-checkbox"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span class="fv-task-text">Capture Idea skill</span></div>
-      <div class="fv-task done"><span class="fv-checkbox"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span class="fv-task-text">Meeting Parser skill</span></div>
-      <div class="fv-task done"><span class="fv-checkbox"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span><span class="fv-task-text">Weekly Review skill</span></div>
-      <div class="fv-h2">Deferred to V1.1</div>
-      <div class="fv-bullet">Vault Health skill</div>
-      <div class="fv-bullet">Research Interview skill</div>
-      <div class="fv-bullet">Search across vault</div>
-      <div class="fv-h2">Deferred to V2</div>
-      <div class="fv-bullet">Google Workspace CLI integration</div>
-      <div class="fv-bullet">Team vault sharing</div>
-      <div class="fv-note">Updated Apr 9: skill list locked after Atelos homescreen session and internal review.</div>
-    `
-  },
-  'product-roadmap-v2.md': {
-    render: () => `
-      <div class="fv-h1">Product Roadmap</div>
-      <div class="fv-h2">Now — V1 Beta (Apr–May 2026)</div>
-      <div class="fv-task"><span class="fv-checkbox"></span><span class="fv-task-text">Electron app shell + vault creation flow</span></div>
-      <div class="fv-task"><span class="fv-checkbox"></span><span class="fv-task-text">4 default skills wired to Claude API</span></div>
-      <div class="fv-task"><span class="fv-checkbox"></span><span class="fv-task-text">10 beta founders — test & iterate</span></div>
-      <div class="fv-h2">Next — V1.1 (Jun 2026)</div>
-      <div class="fv-bullet">Vault Health skill</div>
-      <div class="fv-bullet">Skill eval loop (A/B output testing)</div>
-      <div class="fv-bullet">Search across vault</div>
-      <div class="fv-h2">Later — V2 (Q3 2026)</div>
-      <div class="fv-bullet">Google Workspace CLI integration</div>
-      <div class="fv-bullet">MCP push to Notion, Linear</div>
-      <div class="fv-bullet">Team vault sharing</div>
-    `
-  }
+  // ── Output files — stored as raw markdown, rendered by renderMarkdown() ──
+  'nomad-group-sow.md': { md: `# Nomad Group — Statement of Work
+
+## Engagement Overview
+
+AI Readiness Assessment — **6-week engagement** at **$12,500**. Kick-off pending client confirmation of scope and timeline.
+
+## Scope of Work
+
+- Weeks 1–2: Workflow audit across 2–4 internal teams
+- Weeks 3–4: AI tool evaluation and stakeholder interviews
+- Weeks 5–6: Written assessment + executive presentation
+- Deliverable: 90-day implementation roadmap
+
+## Open Questions
+
+- [ ] Confirm internal champion — Marcus or Priya?
+- [ ] Clarify whether legal needs to review before signing
+
+## Notes
+
+> Drafted from Nomad Group discovery call (Apr 9). Price validated at $10–15K range per prior ICP signals. Two open questions flagged before sending.` },
+
+  'interview-guide.md': { md: `# ICP Interview Guide
+
+## Context
+
+5 priority questions for first-wave ICP interviews. Focus: understanding current workflow pain **before** introducing the product.
+
+## Opening
+
+> Start with context, not product. "Tell me about how your team currently manages [problem area]." Listen for: workarounds, emotional language, time lost.
+
+## Priority Questions
+
+1. Walk me through how you track and manage supplier certifications today.
+2. What's the most frustrating part of your compliance reporting cycle?
+3. How many tools does your team use to piece this together?
+4. What would you need to see to trust a new tool with this workflow?
+5. If you could fix one thing about your current process, what would it be?
+
+## Signals to Watch For
+
+- Mentions of manual reconciliation or "copy-paste from email"
+- Multiple stakeholders involved in a single report
+- Compliance deadlines driving urgency` },
+
+  'partner-call-apr3.md': { md: `# Dev Partner Sync — Launchpad Studio
+
+## Apr 3, 2026 · 45 min · Parsed by Meeting Parser
+
+## Decisions
+
+- [x] Locked onboarding wizard scope to 3-step flow
+- [x] Confirmed REST API path for supplier data pull
+- [x] Agreed: Bubble.io handles front-end, Greenline owns data model
+
+## Action Items
+
+- [ ] Share Meridian API docs with Launchpad by Apr 5
+- [ ] Launchpad to send staging environment link by Apr 7
+- [ ] Schedule next sync for week of Apr 14
+
+## Notes
+
+> Launchpad flagged potential latency issue with large supplier lists. Will scope a pagination solution before next build sprint.` },
+
+  'apr-4.md': { md: `# Weekly Review — Apr 4, 2026
+
+*Generated by Weekly Review skill*
+
+## This Week's Wins
+
+- First dev partner sync completed — Launchpad scope locked
+- Nomad Group discovery call → SOW draft initiated
+- 4 ICP interviews scheduled for April
+
+## Open Items (Carried Forward)
+
+- [ ] Volta: Pinecrest questionnaire still incomplete — 2 sections blank
+- [ ] Greenline: Landing page hero copy — A/B version not yet drafted
+
+## Flags
+
+> Volta falling behind on Nomad Group SOW — transcript parsing blocked by missing audio file. Follow up with client for recording or manual notes.
+
+## Focus for Next Week
+
+- Ship Nomad Group SOW for review by Apr 9
+- Complete first ICP interview
+- Unblock Pinecrest questionnaire` },
+
+  'feedback-apr6.md': { md: `# Homescreen Feedback — Ashley
+
+## Apr 6, 2026 · Session review
+
+## Act Now
+
+- [ ] Rename "Unsorted" → "Triage" — label feels more intentional
+- [ ] Collapse file tree by default — feels cluttered at first open
+
+## Positive Signals
+
+- Loved the skill bar — *"finally a toolbar that makes sense"*
+- Day-scoped threads felt natural after 2 minutes
+- Quick capture shortcut discovered without prompting
+
+## Deferred
+
+- Search across threads — requested but deferred to V1.1
+- Export conversation to PDF — "nice to have, not blocking"
+
+## Notes
+
+> Ashley tested on 13" MacBook — sidebar felt slightly narrow at default width. Consider 300px default on launch.` },
+
+  'decisions-log.md': { md: `# Decisions Log
+
+## Apr 9, 2026
+
+- V1 skill list locked: Daily Briefing, Capture Idea, Meeting Parser, Weekly Review
+- Vault Health + Research Interview deferred to V1.1
+- Skill bar shows locked skills grayed — upgrade prompt on click
+
+## Apr 3, 2026
+
+- Sidebar width default: 280px with resize handle
+- Thread model: day-scoped accordion, not channels
+
+## Mar 22, 2026
+
+- Product name confirmed: **Atelos**
+- Pricing: Free / BYOK $19 / Managed $39
+- V1 Claude-exclusive. BYOM deferred to V2` },
+
+  'tasks.md': { md: `# Greenline — tasks.md
+
+## Open
+
+- [ ] Share Meridian API docs with build partner
+- [ ] Write landing page hero copy — A/B version
+- [ ] Schedule 3 ICP interviews with reentry counselors
+
+## Added by Meeting Parser — Apr 3
+
+- [x] First build partner call completed
+- [x] Confirm Bubble.io dev environment setup` },
+
+  'v1-features.md': { md: `# V1 Feature Scope
+
+## Shipping in V1
+
+- [x] Daily Briefing skill
+- [x] Capture Idea skill
+- [x] Meeting Parser skill
+- [x] Weekly Review skill
+- [x] Collapsible sidebar + three-zone layout
+
+## Deferred to V1.1
+
+- Vault Health skill
+- Research Interview skill
+- Search across vault
+
+## Deferred to V2
+
+- Google Workspace CLI integration
+- Team vault sharing
+
+---
+
+> Updated Apr 9: skill list locked after Atelos homescreen session and internal review.` },
+
+  'product-roadmap-v2.md': { md: `# Product Roadmap
+
+## Now — V1 Beta (Apr–May 2026)
+
+- [ ] Electron app shell + vault creation flow
+- [ ] 4 default skills wired to Claude API
+- [ ] 10 beta founders — test & iterate
+
+## Next — V1.1 (Jun 2026)
+
+- Vault Health skill
+- Skill eval loop (A/B output testing)
+- Search across vault
+
+## Later — V2 (Q3 2026)
+
+- Google Workspace CLI integration
+- MCP push to Notion, Linear
+- Team vault sharing` }
 };
+
+// ── Markdown renderer ──
+function renderMarkdown(md) {
+  function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  const CHK_ICON = '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3.5"><polyline points="20 6 9 17 4 12"/></svg>';
+
+  function inline(s) {
+    s = esc(s);
+    s = s.replace(/`([^`]+)`/g, '<code class="md-code">$1</code>');
+    s = s.replace(/\*\*([^*]+)\*\*/g, '<strong class="md-strong">$1</strong>');
+    s = s.replace(/\*([^*\n]+)\*/g, '<em class="md-em">$1</em>');
+    s = s.replace(/~~([^~]+)~~/g, '<del>$1</del>');
+    s = s.replace(/\[([^\]]+)\]\([^)]*\)/g, '<span class="md-link">$1</span>');
+    return s;
+  }
+
+  const lines = md.trim().split('\n');
+  let out = '', i = 0, inCode = false, codeLines = [], inUl = false, inOl = false;
+
+  function closeList() {
+    if (inUl) { out += '</ul>'; inUl = false; }
+    if (inOl) { out += '</ol>'; inOl = false; }
+  }
+
+  while (i < lines.length) {
+    const line = lines[i];
+
+    // Fenced code block
+    if (line.startsWith('```')) {
+      if (!inCode) { closeList(); inCode = true; codeLines = []; }
+      else { inCode = false; out += `<pre class="md-pre"><code class="md-codeblock">${esc(codeLines.join('\n'))}</code></pre>`; }
+      i++; continue;
+    }
+    if (inCode) { codeLines.push(line); i++; continue; }
+
+    // Headings
+    if (line.startsWith('#### ')) { closeList(); out += `<h4 class="md-h4">${inline(line.slice(5))}</h4>`; i++; continue; }
+    if (line.startsWith('### '))  { closeList(); out += `<h3 class="md-h3">${inline(line.slice(4))}</h3>`; i++; continue; }
+    if (line.startsWith('## '))   { closeList(); out += `<h2 class="md-h2">${inline(line.slice(3))}</h2>`; i++; continue; }
+    if (line.startsWith('# '))    { closeList(); out += `<h1 class="md-h1">${inline(line.slice(2))}</h1>`; i++; continue; }
+
+    // HR
+    if (/^---+$/.test(line.trim())) { closeList(); out += '<hr class="md-hr">'; i++; continue; }
+
+    // Blockquote
+    if (line.startsWith('> ')) { closeList(); out += `<blockquote class="md-blockquote">${inline(line.slice(2))}</blockquote>`; i++; continue; }
+
+    // Italic-only lines (e.g. *text*)
+    const italicLine = line.match(/^\*([^*]+)\*$/);
+    if (italicLine) { closeList(); out += `<p class="md-p"><em class="md-em">${esc(italicLine[1])}</em></p>`; i++; continue; }
+
+    // Checkboxes
+    const checkDone = line.match(/^[-*] \[x\] (.+)/i);
+    const checkOpen = line.match(/^[-*] \[ \] (.+)/);
+    if (checkDone) {
+      if (!inUl) { out += '<ul class="md-ul md-tasklist">'; inUl = true; }
+      out += `<li class="md-task md-task-done"><span class="md-checkbox md-checkbox-done">${CHK_ICON}</span><span class="md-task-text">${inline(checkDone[1])}</span></li>`;
+      i++; continue;
+    }
+    if (checkOpen) {
+      if (!inUl) { out += '<ul class="md-ul md-tasklist">'; inUl = true; }
+      out += `<li class="md-task"><span class="md-checkbox"></span><span class="md-task-text">${inline(checkOpen[1])}</span></li>`;
+      i++; continue;
+    }
+
+    // Unordered list
+    const ulMatch = line.match(/^[-*] (.+)/);
+    if (ulMatch) {
+      if (inOl) { out += '</ol>'; inOl = false; }
+      if (!inUl) { out += '<ul class="md-ul">'; inUl = true; }
+      out += `<li class="md-li">${inline(ulMatch[1])}</li>`;
+      i++; continue;
+    }
+
+    // Ordered list
+    const olMatch = line.match(/^\d+\. (.+)/);
+    if (olMatch) {
+      if (inUl) { out += '</ul>'; inUl = false; }
+      if (!inOl) { out += '<ol class="md-ol">'; inOl = true; }
+      out += `<li class="md-li">${inline(olMatch[1])}</li>`;
+      i++; continue;
+    }
+
+    // Empty line
+    if (line.trim() === '') { closeList(); out += '<div class="md-spacer"></div>'; i++; continue; }
+
+    // Paragraph
+    closeList();
+    out += `<p class="md-p">${inline(line)}</p>`;
+    i++;
+  }
+  closeList();
+  return out;
+}
 
 function openFilePreview(name, projName) {
   const content = FILE_CONTENT[name];
@@ -2230,12 +2394,12 @@ document.addEventListener('click', function(e) {
 function openFileView(name, path) {
   const entry = FILE_CONTENT[name];
   document.getElementById('fileViewTitle').textContent = name;
-  document.getElementById('fileViewPath').textContent = path || '';
+  document.getElementById('fileViewPath').textContent = path ? path.replace(/→|>/g, '›') : '';
 
-  if (entry && entry.render) {
+  if (entry && entry.md) {
+    document.getElementById('fileViewBody').innerHTML = renderMarkdown(entry.md);
+  } else if (entry && entry.render) {
     document.getElementById('fileViewBody').innerHTML = entry.render();
-  } else if (typeof entry === 'string') {
-    document.getElementById('fileViewBody').innerHTML = entry;
   } else {
     document.getElementById('fileViewBody').innerHTML = `<div class="file-view-empty">
       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
@@ -2243,6 +2407,7 @@ function openFileView(name, path) {
     </div>`;
   }
   document.getElementById('fileViewPanel').classList.add('open');
+  document.getElementById('fileViewBody').scrollTop = 0;
 }
 
 function closeFileView() {
@@ -2684,6 +2849,38 @@ document.addEventListener('keydown', e => {
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
       sidebar.style.transition = '';
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    }
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+  });
+})();
+
+// ── File view panel resize ──
+(function initFileViewResize() {
+  const handle = document.getElementById('fileViewResizeHandle');
+  const panel = document.getElementById('fileViewPanel');
+  if (!handle || !panel) return;
+  let startX, startWidth;
+  handle.addEventListener('mousedown', e => {
+    e.preventDefault();
+    startX = e.clientX;
+    startWidth = panel.offsetWidth;
+    handle.classList.add('dragging');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    panel.style.transition = 'none';
+    function onMove(e) {
+      // Dragging left = bigger panel (anchor is right edge)
+      const newWidth = Math.min(Math.max(startWidth + (startX - e.clientX), 320), Math.round(window.innerWidth * 0.82));
+      panel.style.width = newWidth + 'px';
+    }
+    function onUp() {
+      handle.classList.remove('dragging');
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+      panel.style.transition = '';
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
     }
