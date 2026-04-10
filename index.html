@@ -666,11 +666,40 @@ body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--t
 .file-view-close{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:8px;color:var(--text4);cursor:pointer;border:none;background:transparent;font-size:18px;transition:all .15s;flex-shrink:0}
 .file-view-close:hover{background:var(--bg-hover);color:var(--text2)}
 .file-view-body{flex:1;overflow-y:auto;padding:28px 40px 48px}
-.file-view-body.edit-mode{padding:0;background:var(--bg)}
-.file-view-textarea{width:100%;height:100%;background:transparent;border:none;outline:none;color:var(--text2);font-family:'SF Mono',ui-monospace,monospace;font-size:13px;line-height:1.75;resize:none;padding:28px 40px 48px;letter-spacing:-.1px;box-sizing:border-box;tab-size:2}
-.file-view-textarea::placeholder{color:var(--text4)}
+.file-view-body.edit-mode{padding:0;display:flex;flex-direction:column;overflow:hidden}
 .file-view-saved{display:inline-flex;align-items:center;gap:5px;font-size:11px;color:var(--green);font-weight:500;opacity:0;transition:opacity .3s;pointer-events:none}
 .file-view-saved.show{opacity:1}
+
+/* ── Rich text editor toolbar ── */
+.fv-toolbar{display:flex;align-items:center;gap:2px;padding:8px 14px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg-card2)}
+.fv-tb-btn{min-width:28px;height:28px;padding:0 6px;display:flex;align-items:center;justify-content:center;border:none;background:transparent;border-radius:6px;color:var(--text3);cursor:pointer;font-size:12px;font-weight:700;transition:all .15s;font-family:inherit}
+.fv-tb-btn:hover{background:var(--bg-hover);color:var(--text2)}
+.fv-tb-btn.active{background:var(--accent-d);color:var(--accent)}
+.fv-tb-italic{font-style:italic;font-size:14px}
+.fv-tb-mono{font-family:'SF Mono',monospace;font-size:11px;letter-spacing:-.5px}
+.fv-tb-sep{width:1px;height:16px;background:var(--border-lt);margin:0 4px;flex-shrink:0}
+
+/* ── Rich text editor content area ── */
+.fv-editor{flex:1;overflow-y:auto;padding:28px 40px 48px;outline:none;caret-color:var(--accent)}
+.fv-editor::-webkit-scrollbar{width:4px}
+.fv-editor::-webkit-scrollbar-thumb{background:var(--border-lt);border-radius:2px}
+.fv-editor h1{font-size:24px;font-weight:700;color:var(--text);letter-spacing:-.4px;margin:0 0 16px;line-height:1.3}
+.fv-editor h2{font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.7px;margin:28px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.fv-editor h3{font-size:15px;font-weight:600;color:var(--text);margin:18px 0 6px;letter-spacing:-.1px}
+.fv-editor h4{font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 6px}
+.fv-editor p,.fv-editor div{font-size:14px;color:var(--text2);line-height:1.8;margin:0 0 8px}
+.fv-editor strong,.fv-editor b{color:var(--text);font-weight:600}
+.fv-editor em,.fv-editor i{font-style:italic;color:var(--text2)}
+.fv-editor del,.fv-editor s{text-decoration:line-through;color:var(--text4)}
+.fv-editor code{font-family:'SF Mono',ui-monospace,monospace;font-size:12px;background:rgba(155,138,251,.1);color:var(--accent);padding:2px 6px;border-radius:5px}
+.fv-editor pre{background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin:12px 0;overflow-x:auto}
+.fv-editor pre code{background:transparent;padding:0;color:var(--text2);font-size:12.5px;white-space:pre}
+.fv-editor blockquote{border-left:3px solid var(--accent-b);background:var(--accent-d);padding:10px 16px;border-radius:0 10px 10px 0;margin:10px 0;font-style:italic;color:var(--text2);line-height:1.7}
+.fv-editor ul{padding-left:22px;margin:8px 0 12px}
+.fv-editor ol{padding-left:24px;margin:8px 0 12px}
+.fv-editor li{font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:4px}
+.fv-editor hr{border:none;border-top:1px solid var(--border);margin:20px 0}
+.fv-editor a{color:var(--accent)}
 .file-view-body::-webkit-scrollbar{width:4px}
 .file-view-body::-webkit-scrollbar-thumb{background:var(--border-lt);border-radius:2px}
 .file-view-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:var(--text4);font-size:13px;gap:10px}
@@ -2412,6 +2441,134 @@ let fileViewCurrentMd = '';
 let fileViewCurrentName = '';
 let _savedTimer = null;
 
+// ── WYSIWYG editor helpers ────────────────────────────────────────
+
+function mdToEditorHtml(md) {
+  function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function inline(text) {
+    return esc(text)
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+  }
+  const lines = md.split('\n');
+  let html = '', i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    // Fenced code block
+    if (line.startsWith('```')) {
+      const codeLines = [];
+      i++;
+      while (i < lines.length && !lines[i].startsWith('```')) { codeLines.push(lines[i]); i++; }
+      html += '<pre><code>' + esc(codeLines.join('\n')) + '</code></pre>';
+      i++; continue;
+    }
+    // Headings
+    const hm = line.match(/^(#{1,4})\s+(.*)/);
+    if (hm) { html += '<h' + hm[1].length + '>' + inline(hm[2]) + '</h' + hm[1].length + '>'; i++; continue; }
+    // HR
+    if (/^(-{3,}|\*{3,}|_{3,})$/.test(line.trim())) { html += '<hr>'; i++; continue; }
+    // Blockquote
+    if (line.startsWith('> ')) {
+      const bq = [];
+      while (i < lines.length && lines[i].startsWith('> ')) { bq.push(lines[i].slice(2)); i++; }
+      html += '<blockquote>' + inline(bq.join('\n')) + '</blockquote>';
+      continue;
+    }
+    // Unordered list
+    if (/^[-*+]\s/.test(line)) {
+      let items = '';
+      while (i < lines.length && /^[-*+]\s/.test(lines[i])) {
+        items += '<li>' + inline(lines[i].replace(/^[-*+]\s+/, '')) + '</li>'; i++;
+      }
+      html += '<ul>' + items + '</ul>'; continue;
+    }
+    // Ordered list
+    if (/^\d+\.\s/.test(line)) {
+      let items = '';
+      while (i < lines.length && /^\d+\.\s/.test(lines[i])) {
+        items += '<li>' + inline(lines[i].replace(/^\d+\.\s+/, '')) + '</li>'; i++;
+      }
+      html += '<ol>' + items + '</ol>'; continue;
+    }
+    // Empty line
+    if (line.trim() === '') { i++; continue; }
+    // Paragraph — collect contiguous text lines
+    const para = [];
+    while (i < lines.length && lines[i].trim() !== '' &&
+           !lines[i].match(/^#{1,4}\s/) && !/^[-*+]\s/.test(lines[i]) &&
+           !/^\d+\.\s/.test(lines[i]) && !lines[i].startsWith('> ') &&
+           !lines[i].startsWith('```') && !/^(-{3,}|\*{3,}|_{3,})$/.test(lines[i].trim())) {
+      para.push(lines[i]); i++;
+    }
+    if (para.length) html += '<p>' + inline(para.join('<br>')) + '</p>';
+  }
+  return html || '<p><br></p>';
+}
+
+function editorHtmlToMd(el) {
+  function nodeToMd(node) {
+    if (node.nodeType === Node.TEXT_NODE) return node.textContent;
+    if (node.nodeType !== Node.ELEMENT_NODE) return '';
+    const tag = node.tagName.toLowerCase();
+    const kids = () => Array.from(node.childNodes).map(nodeToMd).join('');
+    switch (tag) {
+      case 'h1': return '# ' + kids().trim() + '\n\n';
+      case 'h2': return '## ' + kids().trim() + '\n\n';
+      case 'h3': return '### ' + kids().trim() + '\n\n';
+      case 'h4': return '#### ' + kids().trim() + '\n\n';
+      case 'p': { const t = kids(); return t.trim() ? t + '\n\n' : ''; }
+      case 'div': {
+        // Chrome wraps each line in a div inside contenteditable
+        const hasBlock = Array.from(node.childNodes).some(c =>
+          c.nodeType === Node.ELEMENT_NODE &&
+          ['h1','h2','h3','h4','p','ul','ol','blockquote','pre'].includes(c.tagName.toLowerCase())
+        );
+        const t = kids();
+        if (hasBlock) return t;
+        return t.trim() ? t + '\n' : '\n';
+      }
+      case 'br': return '\n';
+      case 'strong': case 'b': return '**' + kids() + '**';
+      case 'em': case 'i': return '*' + kids() + '*';
+      case 'code': {
+        // Inside <pre> the parent handles fencing; here just return text
+        return node.closest('pre') ? node.textContent : '`' + node.textContent + '`';
+      }
+      case 'pre': {
+        const code = node.querySelector('code');
+        return '```\n' + (code ? code.textContent : node.textContent) + '\n```\n\n';
+      }
+      case 'blockquote': return kids().trim().split('\n').map(l => '> ' + l).join('\n') + '\n\n';
+      case 'ul': {
+        return Array.from(node.childNodes)
+          .filter(c => c.nodeType === Node.ELEMENT_NODE && c.tagName.toLowerCase() === 'li')
+          .map(li => '- ' + Array.from(li.childNodes).map(nodeToMd).join('').trim())
+          .join('\n') + '\n\n';
+      }
+      case 'ol': {
+        return Array.from(node.childNodes)
+          .filter(c => c.nodeType === Node.ELEMENT_NODE && c.tagName.toLowerCase() === 'li')
+          .map((li, n) => (n + 1) + '. ' + Array.from(li.childNodes).map(nodeToMd).join('').trim())
+          .join('\n') + '\n\n';
+      }
+      case 'li': return kids();
+      case 'a': return '[' + kids() + '](' + (node.getAttribute('href') || '') + ')';
+      case 'hr': return '---\n\n';
+      default: return kids();
+    }
+  }
+  const raw = Array.from(el.childNodes).map(nodeToMd).join('');
+  return raw.replace(/\n{3,}/g, '\n\n').trim();
+}
+
+function fvFormat(cmd, val) {
+  document.execCommand(cmd, false, val || null);
+  const ed = document.getElementById('fvEditor');
+  if (ed) ed.focus();
+}
+
 function toggleFileViewEdit() {
   const body = document.getElementById('fileViewBody');
   const btn = document.getElementById('fileViewEditBtn');
@@ -2423,31 +2580,49 @@ function toggleFileViewEdit() {
     btn.classList.add('editing');
     body.classList.add('edit-mode');
 
-    const ta = document.createElement('textarea');
-    ta.className = 'file-view-textarea';
-    ta.id = 'fileViewTextarea';
-    ta.value = fileViewCurrentMd;
-    ta.spellcheck = false;
+    body.innerHTML = `
+      <div class="fv-toolbar">
+        <button class="fv-tb-btn" title="Bold (⌘B)" onmousedown="event.preventDefault();fvFormat('bold')"><strong>B</strong></button>
+        <button class="fv-tb-btn" title="Italic (⌘I)" onmousedown="event.preventDefault();fvFormat('italic')"><em style="font-family:Georgia,serif">I</em></button>
+        <div class="fv-tb-sep"></div>
+        <button class="fv-tb-btn" title="Heading 1" onmousedown="event.preventDefault();fvFormat('formatBlock','<h1>')">H1</button>
+        <button class="fv-tb-btn" title="Heading 2" onmousedown="event.preventDefault();fvFormat('formatBlock','<h2>')">H2</button>
+        <button class="fv-tb-btn" title="Heading 3" onmousedown="event.preventDefault();fvFormat('formatBlock','<h3>')">H3</button>
+        <div class="fv-tb-sep"></div>
+        <button class="fv-tb-btn" title="Bullet list" onmousedown="event.preventDefault();fvFormat('insertUnorderedList')">&#8226; List</button>
+        <button class="fv-tb-btn" title="Numbered list" onmousedown="event.preventDefault();fvFormat('insertOrderedList')">1. List</button>
+        <div class="fv-tb-sep"></div>
+        <button class="fv-tb-btn" title="Blockquote" onmousedown="event.preventDefault();fvFormat('formatBlock','<blockquote>')">&ldquo; Quote</button>
+        <button class="fv-tb-btn" title="Code block" onmousedown="event.preventDefault();fvFormat('formatBlock','<pre>')">{ Code }</button>
+      </div>
+      <div class="fv-editor" id="fvEditor" contenteditable="true" spellcheck="false"></div>`;
 
-    // Tab inserts 2 spaces instead of jumping focus
-    ta.addEventListener('keydown', e => {
-      if (e.key === 'Tab') {
-        e.preventDefault();
-        const s = ta.selectionStart, end = ta.selectionEnd;
-        ta.value = ta.value.slice(0, s) + '  ' + ta.value.slice(end);
-        ta.selectionStart = ta.selectionEnd = s + 2;
+    const editor = document.getElementById('fvEditor');
+    editor.innerHTML = mdToEditorHtml(fileViewCurrentMd);
+
+    editor.addEventListener('keydown', e => {
+      if (e.metaKey || e.ctrlKey) {
+        if (e.key === 'b') { e.preventDefault(); fvFormat('bold'); }
+        if (e.key === 'i') { e.preventDefault(); fvFormat('italic'); }
       }
     });
 
-    body.innerHTML = '';
-    body.appendChild(ta);
-    ta.focus();
+    // Place cursor at start
+    editor.focus();
+    try {
+      const range = document.createRange();
+      range.setStart(editor, 0);
+      range.collapse(true);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    } catch (_) {}
 
   } else {
     // → Preview mode — commit edits
-    const ta = document.getElementById('fileViewTextarea');
-    if (ta) {
-      fileViewCurrentMd = ta.value;
+    const editor = document.getElementById('fvEditor');
+    if (editor) {
+      fileViewCurrentMd = editorHtmlToMd(editor);
       if (fileViewCurrentName && FILE_CONTENT[fileViewCurrentName]) {
         FILE_CONTENT[fileViewCurrentName].md = fileViewCurrentMd;
       }
@@ -2505,10 +2680,10 @@ function openFileView(name, path) {
 function closeFileView() {
   // Commit any unsaved edits silently before closing
   if (fileViewEditing) {
-    const ta = document.getElementById('fileViewTextarea');
-    if (ta && fileViewCurrentName && FILE_CONTENT[fileViewCurrentName]) {
-      FILE_CONTENT[fileViewCurrentName].md = ta.value;
-      fileViewCurrentMd = ta.value;
+    const editor = document.getElementById('fvEditor');
+    if (editor && fileViewCurrentName && FILE_CONTENT[fileViewCurrentName]) {
+      fileViewCurrentMd = editorHtmlToMd(editor);
+      FILE_CONTENT[fileViewCurrentName].md = fileViewCurrentMd;
     }
     fileViewEditing = false;
   }
